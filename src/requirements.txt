@@ -20,6 +20,7 @@ langchain
 langchain-core
 langchain-community
 langchain-groq
+langchain-cerebras
 langchain-nvidia-ai-endpoints
 langgraph
 langchain-huggingface
@@ -30,7 +31,7 @@ langchain-text-splitters
 # Embeddings & vector stores
 sentence-transformers
 faiss-cpu  # Let pip fetch latest wheel
-pinecone-client
+pinecone
 langchain-pinecone
 
 # Document processing
