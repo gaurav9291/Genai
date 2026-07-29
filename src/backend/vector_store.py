@@ -37,6 +37,35 @@ _embeddings_cache = {}
 _vector_store_instance = None
 
 
+def _sanitize_pinecone_metadata(metadata: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Return metadata containing only Pinecone-supported scalar/list values."""
+    sanitized: Dict[str, Any] = {}
+    for key, value in (metadata or {}).items():
+        if value is None:
+            continue
+        if isinstance(value, bool):
+            sanitized[key] = value
+        elif isinstance(value, (str, int, float)):
+            sanitized[key] = value
+        elif isinstance(value, list):
+            items = [str(item) for item in value if item is not None]
+            if items:
+                sanitized[key] = items
+        else:
+            sanitized[key] = json.dumps(value, default=str)
+    return sanitized
+
+
+def _sanitize_documents_for_pinecone(documents: List[Document]) -> List[Document]:
+    return [
+        Document(
+            page_content=document.page_content,
+            metadata=_sanitize_pinecone_metadata(document.metadata),
+        )
+        for document in documents
+    ]
+
+
 class DeterministicFallbackEmbeddings(Embeddings):
     """Small local embedding fallback used when HF models are unavailable.
 
@@ -148,14 +177,16 @@ class VectorStoreWrapper:
     async def async_add_documents(self, documents: List[Document]) -> List[str]:
         loop = asyncio.get_running_loop()
         if self.type == "pinecone":
-            return await loop.run_in_executor(None, lambda: self.vs.add_documents(documents))
+            safe_documents = _sanitize_documents_for_pinecone(documents)
+            return await loop.run_in_executor(None, lambda: self.vs.add_documents(safe_documents))
         else:
             return await loop.run_in_executor(None, lambda: self.vs.add_documents(documents))
 
     async def async_update_metadata(self, id: str, metadata: Dict[str, Any]):
         loop = asyncio.get_running_loop()
         if self.type == "pinecone":
-            await loop.run_in_executor(None, lambda: self.vs._index.update(id=id, set_metadata=metadata, namespace=self.namespace))
+            safe_metadata = _sanitize_pinecone_metadata(metadata)
+            await loop.run_in_executor(None, lambda: self.vs._index.update(id=id, set_metadata=safe_metadata, namespace=self.namespace))
             return True
         else:
             for doc_id in list(self.vs.docstore._dict.keys()):
