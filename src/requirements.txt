@@ -1,0 +1,59 @@
+# Web framework
+fastapi
+uvicorn[standard]
+streamlit
+
+# File handling
+python-multipart
+aiofiles
+
+# Data validation
+pydantic
+pydantic-settings
+
+# Database
+sqlalchemy
+alembic
+
+# LangChain & AI stack
+langchain
+langchain-core
+langchain-community
+langchain-groq
+langchain-nvidia-ai-endpoints
+langgraph
+langchain-huggingface
+langchain-ollama
+langchain-text-splitters
+
+
+# Embeddings & vector stores
+sentence-transformers
+faiss-cpu  # Let pip fetch latest wheel
+pinecone-client
+langchain-pinecone
+
+# Document processing
+pypdf
+python-docx
+reportlab
+markdown-it-py
+pypandoc
+xhtml2pdf
+weasyprint
+markdown2
+
+# LLM tools
+groq
+
+# Utilities
+numpy
+tiktoken
+python-dotenv
+requests
+
+# Dev & testing
+pytest
+pytest-asyncio
+black
+isort
